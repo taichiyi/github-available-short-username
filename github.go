@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+const isHaveNumber = false                        // 用户名是否含有数字
 const intervalTime = 90 * 1000 * time.Millisecond // 暂停多久
 const limitNumber = 38                            // 每请求多少个暂停一次
 const requestURL = "https://github.com/signup_check/username"
@@ -78,7 +79,6 @@ func newfileUploadRequest(username string) {
 			if len(body.String()) == 25 {
 				dataJSON[username] = "already"
 				fmt.Printf("already")
-				// fmt.Printf("%v", body)
 			} else if len(body.String()) < 100 {
 				if strings.Contains(body.String(), "reserved") {
 					dataJSON[username] = "reserved"
@@ -95,20 +95,31 @@ func newfileUploadRequest(username string) {
 	}
 }
 
-// 生成可能的集合
-func calcAssemble() {
-	data := [26]string{
-		// "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-		"a", "b", "c", "d", "e", "f",
-		"g", "h", "i", "j", "k", "l",
-		"m", "n", "o", "p", "q", "r",
-		"s", "t", "u", "v", "w", "x",
-		"y", "z"}
+func makeAssemble() (data *[]string) {
+	if isHaveNumber {
+		data = &[]string{
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+			"a", "b", "c", "d", "e", "f",
+			"g", "h", "i", "j", "k", "l",
+			"m", "n", "o", "p", "q", "r",
+			"s", "t", "u", "v", "w", "x",
+			"y", "z"}
+	} else {
+		data = &[]string{
+			"a", "b", "c", "d", "e", "f",
+			"g", "h", "i", "j", "k", "l",
+			"m", "n", "o", "p", "q", "r",
+			"s", "t", "u", "v", "w", "x",
+			"y", "z"}
+	}
+	return
+}
 
-	for _, v0 := range data {
-		for _, v1 := range data {
-			// assemble = append(assemble, v0+v1)
-			for _, v2 := range data {
+// 生成可能的集合
+func calcAssemble(data *[]string) {
+	for _, v0 := range *data {
+		for _, v1 := range *data {
+			for _, v2 := range *data {
 				assemble = append(assemble, v0+v1+v2)
 			}
 		}
@@ -169,7 +180,6 @@ func readJSONFile() []byte {
 
 // 写入json文件
 func writeJSONFile() {
-	// return
 	file, _ := os.OpenFile(fileJSON, os.O_CREATE|os.O_WRONLY, 0666)
 	defer file.Close()
 	enc := json.NewEncoder(file)
@@ -207,8 +217,13 @@ func main() {
 		fmt.Println("json.Unmarshal err")
 	}
 
-	calcAssemble()
-	filter(assemble)
+	calcAssemble(makeAssemble())
+	// 如果允许用户名包含数字，则筛掉数字开头的用户名(gitee的用户名只能字母开头)
+	if isHaveNumber {
+		filter(assemble)
+	} else {
+		assembleFilter = assemble
+	}
 	fmt.Printf("需扫描的个数: %d\n", len(assembleFilter))
 	cycleRequest(0, limitNumber)
 }
