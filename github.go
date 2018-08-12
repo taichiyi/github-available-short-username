@@ -87,6 +87,7 @@ func sendRequest(username string) {
 					// fmt.Printf("reserved")
 					fmt.Printf("%d", len(dataJSON))
 				} else {
+					dataJSON[username] = "other"
 					// fmt.Printf("other")
 					fmt.Printf("%d", len(dataJSON))
 				}
