@@ -159,7 +159,7 @@ func readJSONFile() []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	data := make([]byte, 100000)
+	data := make([]byte, 100000000)
 	n, err := fp.Read(data)
 	if err != nil {
 		log.Fatal(err)
