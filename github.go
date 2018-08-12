@@ -209,6 +209,6 @@ func main() {
 
 	calcAssemble()
 	filter(assemble)
-	fmt.Printf("需请求的个数: %d\n", len(assembleFilter))
+	fmt.Printf("需扫描的个数: %d\n", len(assembleFilter))
 	cycleRequest(0, limitNumber)
 }
