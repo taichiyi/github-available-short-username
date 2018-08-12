@@ -32,7 +32,7 @@ var assembleFilter []string
 // 存放json数据
 var dataJSON map[string]interface{}
 
-func newfileUploadRequest(username string) {
+func sendRequest(username string) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -74,21 +74,26 @@ func newfileUploadRequest(username string) {
 
 		if resp.StatusCode == 200 {
 			dataJSON[username] = "ok"
-			fmt.Printf("ok")
+			// fmt.Printf("ok")
+			fmt.Printf("%d", len(dataJSON))
 		} else {
 			if len(body.String()) == 25 {
 				dataJSON[username] = "already"
-				fmt.Printf("already")
+				// fmt.Printf("already")
+				fmt.Printf("%d", len(dataJSON))
 			} else if len(body.String()) < 100 {
 				if strings.Contains(body.String(), "reserved") {
 					dataJSON[username] = "reserved"
-					fmt.Printf("reserved")
+					// fmt.Printf("reserved")
+					fmt.Printf("%d", len(dataJSON))
 				} else {
-					fmt.Printf("other")
+					// fmt.Printf("other")
+					fmt.Printf("%d", len(dataJSON))
 				}
 			} else {
 				dataJSON[username] = "limit"
-				fmt.Printf("limit")
+				// fmt.Printf("limit")
+				fmt.Printf("%d", len(dataJSON))
 			}
 		}
 		writeJSONFile()
@@ -143,18 +148,22 @@ func cycleRequest(index int, limit int) {
 		if dataJSON[assembleFilter[index]] == nil ||
 			dataJSON[assembleFilter[index]] == "limit" {
 
-			newfileUploadRequest(assembleFilter[index])
+			sendRequest(assembleFilter[index])
+			fmt.Printf("->")
 		} else {
-			fmt.Printf("cache")
+			// fmt.Printf("cache")
 			limit++
 		}
-		fmt.Printf("-")
-		fmt.Printf(assembleFilter[index])
-		fmt.Printf("|")
+
+		// fmt.Printf("-")
+		// fmt.Printf(assembleFilter[index])
+		// fmt.Printf("|")
 
 		index++
 		if index == limit {
+			fmt.Printf("(Sleeping)")
 			time.Sleep(intervalTime)
+			fmt.Printf("->")
 			limit += limitNumber
 		}
 		cycleRequest(index, limit)
@@ -224,6 +233,6 @@ func main() {
 	} else {
 		assembleFilter = assemble
 	}
-	fmt.Printf("需扫描的个数: %d\n", len(assembleFilter))
+	fmt.Printf("进度: %d/%d\n", len(dataJSON), len(assembleFilter))
 	cycleRequest(0, limitNumber)
 }
